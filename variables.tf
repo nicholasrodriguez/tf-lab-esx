@@ -38,3 +38,13 @@ variable "LAB_USER" {
   description = "Non root user of the lab from env TF_LAB_USER"
   type = string
 }
+
+variable "vms" {
+  description = "List of VMs to be managed"
+  type        = list(string)
+  default     = [
+    "lvm05",
+    "lvm06",
+    "lvm07",
+  ]
+}
