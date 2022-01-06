@@ -12,6 +12,11 @@ resource "esxi_guest" "vmtest" {
   }
 }
 
+resource "fakewebservices_database" "test_server" {
+  name = "Test Server 1"
+  size = 512
+}
+
 output "esxi_message" {
   description = "End message"
   value       = var.esxi_account

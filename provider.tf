@@ -5,3 +5,5 @@ provider "esxi" {
   esxi_username = var.esxi_account
   esxi_password = var.LAB_PW
 }
+
+provider "fakewebservices" {}
