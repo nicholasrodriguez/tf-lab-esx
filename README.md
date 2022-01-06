@@ -6,8 +6,9 @@ Lab for Terraform Associate Exam
 # Notes
 
 ## Migrate State From TFC back to Local
-Rename backend.tf
+
 ```
+mv backend.tf backend.tf.old
 terraform init -migrate-state
 ```
 ## Migrate State From Local back to TFC
