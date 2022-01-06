@@ -21,3 +21,6 @@ terraform plan
 
 ## Execution Mode
 Set Execution Mode on workspace to Local for internal runs i.e. for home lab hosts not on the internet. This just stores the state remotely.
+
+## Check State of Specific Resource
+terraform state show esxi_guest.vmtest
