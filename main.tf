@@ -21,3 +21,8 @@ output "esxi_message" {
   description = "End message"
   value       = var.esxi_account
 }
+
+output "test" {
+  description = "End message"
+  value       = var.vms[1]
+}
