@@ -38,6 +38,7 @@ yum-config-manager --add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.
 # https://learn.hashicorp.com/tutorials/packer/get-started-install-cli
 yum -y install terraform
 yum -y install packer
+yum -y install vault
 
 # Get Lab Variables
 
