@@ -9,6 +9,8 @@ fi
 
 yum -y update
 
+yum -y install yum-utils
+
 yum -y install git
 
 yum -y install vim
@@ -27,6 +29,15 @@ if ! dnf list installed atom; then
     curl -SLo ~/atom.rpm https://atom.io/download/rpm
     dnf -y localinstall ~/atom.rpm
 fi
+
+# Install HashiCorp Repo
+yum-config-manager --add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo
+
+# Install HashiCorp Stuffs
+# https://learn.hashicorp.com/tutorials/terraform/install-cli
+# https://learn.hashicorp.com/tutorials/packer/get-started-install-cli
+yum -y install terraform
+yum -y install packer
 
 # Get Lab Variables
 
