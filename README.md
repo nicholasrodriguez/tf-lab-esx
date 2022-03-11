@@ -386,6 +386,71 @@ terraform output db_password
 Generate machine-readable output using ```terraform output -json```. Terraform does not redact sensitive output values with the -json option, because it assumes that an automation tool will use the output.
 
 
+# Data Sources
+
+Cloud infrastructure, applications, and services emit data, which Terraform can query and act on using data sources. Terraform uses data sources to fetch information from cloud provider APIs, such as disk image IDs, or information about the rest of your infrastructure through the outputs of other Terraform configurations.
+
+Data sources allow you to load data from APIs or other Terraform workspaces. You can use this data to make your project's configuration more flexible, and to connect workspaces that manage different parts of your infrastructure. You can also use data sources to connect and share data between workspaces in Terraform Cloud and Terraform Enterprise.
+
+Use the aws_availability_zones data source to load the available AZs for the current region. Add the following to `main.tf`.
+
+```
+data "aws_availability_zones" "available" {
+  state = "available"
+}
+```
+
+The `aws_availability_zones` data source is part of the AWS provider, and its documentation is under its provider in the Terraform registry. Like resources, data source blocks support arguments to specify how they behave. In this case, the state argument limits the availability zones to only those that are currently available.
+
+You can reference data source attributes with the pattern `data.<NAME>.<ATTRIBUTE>`. Update the VPC configuration to use this data source to set the list of availability zones.
+
+```
+azs             = data.aws_availability_zones.available.names
+```
+
+Set the VPC workspace output the region, which the application workspace requires as an input. Add a data source to main.tf to access region information.
+
+```data "aws_region" "current" { }
+```
+
+Add an output for the region to `outputs.tf`.
+```
+output "aws_region" {
+  description = "AWS region"
+  value       = data.aws_region.current.name
+}
+```
+
+## Source Data From Remote state
+This remote state block uses the local backend to load state data from the path in the config section. Terraform remote state also supports a remote backend type for use with remote systems, such as Terraform Cloud, Consul, or other systems.
+
+```
+data "terraform_remote_state" "vpc" {
+  backend = "local"
+
+  config = {
+    path = "../learn-terraform-data-sources-vpc/terraform.tfstate"
+  }
+}
+```
+
+Replace the hard-coded region configuration in main.tf with the region output from the VPC workspace.
+```provider "aws" {
+    region = data.terraform_remote_state.vpc.outputs.aws_region
+ }
+```
+
+Configure the load balancer security group and subnet arguments with the corresponding outputs from your VPC workspace.
+```
+module "elb_http" {
+   ## ...
+
+  security_groups = data.terraform_remote_state.vpc.outputs.lb_security_group_ids
+  subnets         = data.terraform_remote_state.vpc.outputs.public_subnet_ids
+   ## ...
+ }
+```
+Terraform remote state can only load "root-level" output values from the source workspace, it cannot directly access values from resources or modules in the source workspace. To retrieve those values, you must add a corresponding output to the source workspace.
 
 
 ## Troubleshoot Terraform
