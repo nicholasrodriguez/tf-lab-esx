@@ -7,6 +7,8 @@ Lab for Terraform Associate Exam
 
 Aggregated notes from the above site
 
+# Constructs
+
 ## Providers, Versions & Locking
 
 Terraform providers manage resources by communicating between Terraform and target APIs. Whenever the target APIs change or add functionality, provider maintainers may update and version the provider.
@@ -70,6 +72,8 @@ resource "aws_instance" "app_server" {
 The resource type is aws_instance and the name is app_server. The prefix of the type maps to the name of the provider. In the example configuration, Terraform manages the aws_instance resource with the aws provider. Together, the resource type and resource name form a unique ID for the resource. For example, the ID for your EC2 instance is aws_instance.app_server.
 
 Resource blocks contain arguments which you use to configure the resource. Arguments can include things like machine sizes, disk image names, or VPC IDs. Our providers reference documents the required and optional arguments for each resource. For your EC2 instance, the example configuration sets the AMI ID to an Ubuntu image, and the instance type to t2.micro, which qualifies for AWS' free tier. It also sets a tag to give the instance a name.
+
+# Actions
 
 ## Initialize the directory
 
@@ -183,7 +187,7 @@ Set Execution Mode on workspace to Local for internal runs i.e. for home lab hos
 terraform state show esxi_guest.vmtest
 ```
 
-## Variables
+# Variables
 
 Variable declarations can appear anywhere in your configuration files. However, we recommend putting them into a separate file called `variables.tf` to make it easier for users to understand how the configuration is meant to be customized.
 
@@ -295,8 +299,91 @@ variable "resource_tags" {
 ```
 
 
+# Output
+
+Output declarations can appear anywhere in your Terraform configuration files. However, we recommend putting them into a separate file called outputs.tf to make it easier for users to understand your configuration and what outputs to expect from it.
+
+e.g.
+```
+output "vpc_id" {
+  description = "ID of project VPC"
+  value       = module.vpc.vpc_id
+}
+```
+
+While the description argument is optional, you should include it in all output declarations to document the intent and content of the output.
+
+You can use the result of any Terraform expression as the value of an output. Use expressions to declare outputs for the load balancer URL and number of web servers provisioned by this configuration by adding the following to outputs.tf.
+
+```
+output "lb_url" {
+  description = "URL of load balancer"
+  value       = "http://${module.elb_http.this_elb_dns_name}/"
+}
+
+output "web_server_count" {
+  description = "Number of web servers provisioned"
+  value       = length(module.ec2_instances.instance_ids)
+}
+```
+
+The `lb_url `output uses string interpolation to create a URL from the load balancer's domain name. The `web_server_count` output uses the `length() function` to calculate the number of instances attached to the load balancer.
+
+Terraform stores output values in its state file. In order to see these outputs, you need to update the state by applying this new configuration, even though the infrastructure will not change. Respond to the confirmation prompt with a `yes`.
 
 
+## Query outputs
+
+Now that Terraform has loaded the outputs into your project's state, use the terraform output command to query all of them.
+
+```
+terraform output
+
+lb_url = "http://lb-5YI-project-alpha-dev-2144336064.us-east-1.elb.amazonaws.com/"
+vpc_id = "vpc-004c2d1ba7394b3d6"
+web_server_count = 4
+```
+Next, query an individual output by name.
+```
+terraform output lb_url
+"http://lb-5YI-project-alpha-dev-2144336064.us-east-1.elb.amazonaws.com/"
+
+```
+Starting with version 0.14, Terraform wraps string outputs in quotes by default. You can use the -raw flag when querying a specified output for machine-readable format.
+```
+terraform output -raw lb_url
+http://lb-5YI-project-alpha-dev-2144336064.us-east-1.elb.amazonaws.com/
+```
+Use the lb_url output value with the -raw flag to cURL the load balancer and verify the response.
+```
+curl $(terraform output -raw lb_url)
+<html><body><div>Hello, world!</div></body></html>
+```
+
+## Redact sensitive outputs
+
+You can designate Terraform outputs as sensitive. Terraform will redact the values of sensitive outputs to avoid accidentally printing them out to the console. Use sensitive outputs to share sensitive data from your configuration with other Terraform modules, automation tools, or Terraform Cloud workspaces.
+
+Terraform will redact sensitive outputs when planning, applying, or destroying your configuration, or when you query all of your outputs. Terraform will not redact sensitive outputs in other cases, such as when you query a specific output by name, query all of your outputs in JSON format, or when you use outputs from a child module in your root module.
+
+Add the following sensitive output blocks to your `outputs.tf` file.
+
+```
+output "db_username" {
+  description = "Database administrator username"
+  value       = aws_db_instance.database.username
+  sensitive   = true
+}
+```
+Terraform redacts the values of the outputs marked as sensitive in `apply` output
+
+Use `terraform output` to query the database password by name, Terraform will not redact the value when you specify the output by name.
+```
+terraform output db_password
+"notasecurepassword"
+```
+
+Generate machine-readable output using ```terraform output -json```. Terraform does not redact sensitive output values with the -json option, because it assumes that an automation tool will use the output.
 
 
 
