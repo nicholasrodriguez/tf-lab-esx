@@ -26,11 +26,12 @@ The lock file causes Terraform to always install the same provider version, ensu
 
 Note: You should never directly modify the lock file.
 
-The -upgrade flag will upgrade all providers to the latest version consistent within the version constraints previously established in your configuration.
+The `-upgrade` flag will upgrade all providers to the latest version consistent within the version constraints previously established in your configuration.
 
-You can also use the -upgrade flag to downgrade the provider versions if the version constraints are modified to specify a lower provider version.
+You can also use the `-upgrade` flag to downgrade the provider versions if the version constraints are modified to specify a lower provider version.
 
-``` terraform init -upgrade
+```
+terraform init -upgrade
 ```
 
 Use `terraform get` to include new modules or resources in existing configuration
@@ -556,7 +557,8 @@ In older versions of Terraform, you may have used the `terraform taint` command 
 
 e.g.
 
-```terraform plan -replace="aws_instance.example"
+```
+terraform plan -replace="aws_instance.example"
 ```
 When you apply this change, Terraform will destroy your running instance and create a new one.
 
