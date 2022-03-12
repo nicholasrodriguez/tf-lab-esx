@@ -57,6 +57,14 @@ required_providers {
 }
 ```
 
+Additional provider configuration for west coast region; resources can# reference this as `aws.west`.
+
+```
+provider "aws" {  
+  alias  = "west"
+  region = "us-west-2"}
+```
+
 ## Resources
 
 Use resource blocks to define components of your infrastructure. A resource might be a physical or virtual component such as an EC2 instance, or it can be a logical resource such as a Heroku application.
