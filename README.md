@@ -674,7 +674,7 @@ In order to propose accurate changes to your infrastructure, Terraform first att
 
 Though Terraform will continue to support the `refresh` subcommand in future versions, it is deprecated, and we encourage you to use the `-refresh-only` flag instead. This allows you to review any updates to your state file. Unlike the `refresh` subcommand, `-refresh-only mode` is supported in workspaces using Terraform Cloud as a remote backend, allowing your team to collaboratively review any modifications.
 
-####
+
 # Troubleshoot Terraform
 
 The format command scans the current directory for configuration files and rewrites your Terraform configuration files to the recommended format.
