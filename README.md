@@ -20,11 +20,11 @@ When multiple users or automation tools run the same Terraform configuration, th
 
 If you do not scope provider version appropriately, Terraform will download the latest provider version that fulfills the version constraint. This may lead to unexpected infrastructure changes. By specifying carefully scoped provider versions and using the dependency lock file, you can ensure Terraform is using the correct provider version so your configuration is applied consistently.
 
-When you initialize a Terraform configuration for the first time with Terraform 0.14 or later, Terraform will generate a new .terraform.lock.hcl file in the current working directory. You should include the lock file in your version control repository to ensure that Terraform uses the same provider versions across your team and in ephemeral remote execution environments.
+When you initialize a Terraform configuration for the first time with Terraform 0.14 or later, Terraform will generate a new .terraform.lock.hcl file in the current working directory. You **should include the lock file in your version control repository** to ensure that Terraform uses the same provider versions across your team and in ephemeral remote execution environments.
 
 The lock file causes Terraform to always install the same provider version, ensuring that runs across your team or remote sessions will be consistent.
 
-Note: You should never directly modify the lock file.
+**Note: You should never directly modify the lock file.**
 
 The `-upgrade` flag will upgrade all providers to the latest version consistent within the version constraints previously established in your configuration.
 
@@ -44,7 +44,7 @@ The terraform {} block contains Terraform settings, including the required provi
 
 The provider block configures the specified provider. A provider is a plugin that Terraform uses to create and manage your resources.
 
-Never hard-code credentials or other secrets in your Terraform configuration files. Like other types of code, you may share and manage your Terraform configuration files using source control, so hard-coding secret values can expose them to attackers.
+**Never hard-code credentials or other secrets in your Terraform configuration files**. Like other types of code, you may share and manage your Terraform configuration files using source control, so hard-coding secret values can expose them to attackers.
 
 You can use multiple provider blocks in your Terraform configuration to manage resources from different providers. You can even use different providers together. For example, you could pass the IP address of your AWS EC2 instance to a monitoring resource from DataDog.
 
@@ -72,9 +72,9 @@ resource "aws_instance" "app_server" {
   }
 }
 ```
-The resource type is aws_instance and the name is app_server. The prefix of the type maps to the name of the provider. In the example configuration, Terraform manages the aws_instance resource with the aws provider. Together, the resource type and resource name form a unique ID for the resource. For example, the ID for your EC2 instance is aws_instance.app_server.
+The resource type is `aws_instance` and the name is `app_server`. The prefix of the type maps to the name of the provider. In the example configuration, Terraform manages the `aws_instance` resource with the aws provider. Together, the resource type and resource name form a unique ID for the resource. For example, the ID for your EC2 instance is `aws_instance.app_server`.
 
-Resource blocks contain arguments which you use to configure the resource. Arguments can include things like machine sizes, disk image names, or VPC IDs. Our providers reference documents the required and optional arguments for each resource. For your EC2 instance, the example configuration sets the AMI ID to an Ubuntu image, and the instance type to t2.micro, which qualifies for AWS' free tier. It also sets a tag to give the instance a name.
+Resource blocks contain arguments which you use to configure the resource. Arguments can include things like machine sizes, disk image names, or VPC IDs. Our providers reference documents the required and optional arguments for each resource. For the EC2 instance above, the example configuration sets the AMI ID to an Ubuntu image, and the instance type to t2.micro, which qualifies for AWS' free tier. It also sets a tag to give the instance a name.
 
 # Actions
 
@@ -82,7 +82,7 @@ Resource blocks contain arguments which you use to configure the resource. Argum
 
 When you create a new configuration — or check out an existing configuration from version control — you need to initialize the directory with `terraform init`.
 
-Initializing a configuration directory downloads and installs the providers defined in the configuration, which in this case is the aws provider.
+Initializing a configuration directory downloads and installs the providers defined in the configuration.
 
 ## Format and validate the configuration
 
@@ -95,7 +95,7 @@ You can also make sure your configuration is syntactically valid and internally 
 
 ## Create infrastructure
 
-`terraform apply` Before it applies any changes, Terraform prints out the execution plan which describes the actions Terraform will take in order to change your infrastructure to match the configuration.
+`terraform apply`, Before it applies any changes, Terraform prints out the execution plan which describes the actions Terraform will take in order to change your infrastructure to match the configuration.
 
 The output format is similar to the diff format generated by tools such as Git. The output has a `+` next to `aws_instance.app_server`, meaning that Terraform will create this resource. Beneath that, it shows the attributes that will be set. When the value displayed is `(known after apply)`, it means that the value will not be known until the resource is created. For example, AWS assigns Amazon Resource Names (ARNs) to instances upon creation, so Terraform cannot know the value of the `arn` attribute until you apply the change and the AWS provider returns that value from the AWS API.
 
@@ -108,7 +108,7 @@ In this case the plan is acceptable, so type `yes` at the confirmation prompt to
 
 When applied Terraform writes data into a file called `terraform.tfstate`. Terraform stores the IDs and properties of the resources it manages in this file, so that it can update or destroy those resources going forward.
 
-The Terraform state file is the only way Terraform can track which resources it manages, and often contains sensitive information, so you must store your state file securely and restrict access to only trusted team members who need to manage your infrastructure. In production, we recommend storing your state remotely with Terraform Cloud or Terraform Enterprise. Terraform also supports several other remote backends you can use to store and manage your state.
+The Terraform state file is the only way Terraform can track which resources it manages, and often contains sensitive information, so **you must store your state file securely and restrict access to only trusted team members who need to manage your infrastructure**. In production, we recommend storing your state remotely with Terraform Cloud or Terraform Enterprise. Terraform also supports several other remote backends you can use to store and manage your state.
 
 Inspect the current state using `terraform show`.
 
@@ -124,7 +124,7 @@ aws_instance.app_server
 
 The `terraform destroy` command terminates resources managed by your Terraform project. This command is the inverse of `terraform apply` in that it terminates all the resources specified in your Terraform state. It does not destroy resources running elsewhere that are not managed by the current Terraform project.
 
-# TFC Store Remote State
+# Terraform Cloud - Store Remote State
 
 Terraform Cloud allows teams to easily version, audit, and collaborate on infrastructure changes. It also securely stores variables, including API tokens and access keys, and provides a safe, stable environment for long-running Terraform processes.
 
@@ -192,7 +192,7 @@ terraform state show esxi_guest.vmtest
 
 # Variables
 
-Variable declarations can appear anywhere in your configuration files. However, we recommend putting them into a separate file called `variables.tf` to make it easier for users to understand how the configuration is meant to be customized.
+Variable declarations can appear anywhere in your configuration files. However, **we recommend putting them into a separate file called** `variables.tf` to make it easier for users to understand how the configuration is meant to be customized.
 
 To parameterize an argument with an input variable, you will first define the variable in `variables.tf`, then replace the hardcoded value with a reference to that variable in your configuration.
 
@@ -204,7 +204,7 @@ Variable blocks have three optional arguments.
 
 We recommend setting a description and type for all variables, and setting a default value when practical.
 
-If you do not set a default value for a variable, you must assign a value before Terraform can apply the configuration. Terraform does not support unassigned variables. You will see some of the ways to assign values to variables later in this tutorial.
+If you do not set a default value for a variable, **you must assign a value before Terraform can apply the configuration**. Terraform does not support unassigned variables. You will see some of the ways to assign values to variables later in this tutorial.
 
 Variable values must be literal values, and cannot use computed values like resource attributes, expressions, or other variables.
 
@@ -235,7 +235,7 @@ variable "private_subnet_cidr_blocks" {
   ]
 }
 ```
-Use Terraform Console
+Use Terraform Console to query Variables
 ```
 terraform console
 > var.private_subnet_cidr_blocks
@@ -260,9 +260,7 @@ tolist([
 ```
 Leave the console by typing `exit` or pressing `Control-D`.
 
-Terraform will prompt for unassigned variables.
-
-Whenever you execute a plan, destroy, or apply with any variable unassigned, Terraform will prompt you for a value. Entering variable values manually is time consuming and error prone, so Terraform provides several other ways to assign values to variables.
+Whenever you execute a `plan`, `destroy`, or `apply` with any variable unassigned, Terraform will prompt you for a value. Entering variable values manually is time consuming and error prone, so Terraform provides several other ways to assign values to variables.
 
 Create a file named `terraform.tfvars` with the following contents.
 ```
@@ -301,10 +299,9 @@ variable "resource_tags" {
 
 ```
 
-
 # Output
 
-Output declarations can appear anywhere in your Terraform configuration files. However, we recommend putting them into a separate file called outputs.tf to make it easier for users to understand your configuration and what outputs to expect from it.
+Output declarations can appear anywhere in your Terraform configuration files. However, we **recommend putting them into a separate file called** `outputs.tf` to make it easier for users to understand your configuration and what outputs to expect from it.
 
 e.g.
 ```
@@ -316,7 +313,7 @@ output "vpc_id" {
 
 While the description argument is optional, you should include it in all output declarations to document the intent and content of the output.
 
-You can use the result of any Terraform expression as the value of an output. Use expressions to declare outputs for the load balancer URL and number of web servers provisioned by this configuration by adding the following to outputs.tf.
+You can use the result of any Terraform expression as the value of an output. Use expressions to declare outputs for the load balancer URL and number of web servers provisioned by this configuration by adding the following to `outputs.tf`.
 
 ```
 output "lb_url" {
@@ -330,14 +327,14 @@ output "web_server_count" {
 }
 ```
 
-The `lb_url `output uses string interpolation to create a URL from the load balancer's domain name. The `web_server_count` output uses the `length() function` to calculate the number of instances attached to the load balancer.
+The `lb_url` output uses string interpolation to create a URL from the load balancer's domain name. The `web_server_count` output uses the `length() function` to calculate the number of instances attached to the load balancer.
 
 Terraform stores output values in its state file. In order to see these outputs, you need to update the state by applying this new configuration, even though the infrastructure will not change. Respond to the confirmation prompt with a `yes`.
 
 
 ## Query outputs
 
-Now that Terraform has loaded the outputs into your project's state, use the terraform output command to query all of them.
+Now that Terraform has loaded the outputs into your project's state, use the `terraform output` command to query all of them.
 
 ```
 terraform output
@@ -352,12 +349,12 @@ terraform output lb_url
 "http://lb-5YI-project-alpha-dev-2144336064.us-east-1.elb.amazonaws.com/"
 
 ```
-Starting with version 0.14, Terraform wraps string outputs in quotes by default. You can use the -raw flag when querying a specified output for machine-readable format.
+Starting with version 0.14, Terraform wraps string outputs in quotes by default. You can use the `-raw` flag when querying a specified output for machine-readable format.
 ```
 terraform output -raw lb_url
 http://lb-5YI-project-alpha-dev-2144336064.us-east-1.elb.amazonaws.com/
 ```
-Use the lb_url output value with the -raw flag to cURL the load balancer and verify the response.
+Use the lb_url output value with the `-raw` flag to CURL the load balancer and verify the response.
 ```
 curl $(terraform output -raw lb_url)
 <html><body><div>Hello, world!</div></body></html>
